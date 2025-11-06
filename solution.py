@@ -5,7 +5,7 @@ def hamiltonian_check(H, perm):
     :return if it is a valid hamiltonian path:
     """
     n = len(H)
-    for i in range(n-2):
+    for i in range(n-1):
         if H[perm[i]][perm[i+1]] == 0:
             return False
     return True
@@ -57,11 +57,11 @@ def get_connected_subset(graph, start):
     get_subset_dfs(graph, start, marked)
 
     L = [i for i in range(len(graph)) if marked[i]]
-    H = [[0 for i in range(len(graph)//3)] for j in range(len(graph)//3)]
+    H = [[0 for _ in range(len(graph)//3)] for _ in range(len(graph[0])//3)]
     for i in range(len(L)):
         for j in range(len(L)):
             H[i][j] = graph[L[i]][L[j]]
-    return H
+    return H, L
 
 def finish_combination(trace, all_combs, cur_ind, n, start, end):
     if len(trace) + 1 == n:
@@ -76,9 +76,8 @@ def finish_combination(trace, all_combs, cur_ind, n, start, end):
         if i == end:
             continue
         trace.append(i)
-        finish_combination(trace, all_combs, i+1, n, end)
+        finish_combination(trace, all_combs, i+1, n, start, end)
         trace.pop()
-        return
 
 
 def get_all_combinations(graph, start, end):
@@ -101,14 +100,19 @@ def hamiltonian_naive(graph, start, end):
         for i in range(len(comb)):
             for j in range(len(comb)):
                 H[i][j] = graph[comb[i]][comb[j]]
-        if check_all_permutations(H, start, end):
+        if check_all_permutations(H, 0, len(H)-1):
             return True
     return False
 
 
 def hamiltonian_optimized(graph, start, end):
-    H = get_connected_subset(graph, start)
+    H, L = get_connected_subset(graph, start)
+    if end not in L:
+        return False
 
-    if check_all_permutations(H, start, end):
+    start_i = L.index(start)
+    end_i = L.index(end)
+
+    if check_all_permutations(H, start_i, end_i):
         return True
     return False
